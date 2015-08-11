@@ -114,11 +114,17 @@ class DateTime extends \DateTime
 
         $diff = $this->getMicroseconds() + $microseconds;
 
-        if ($diff > 1e6) { // +1 sec
+        if ($diff > 1e6) {
             $this->setMicroseconds($diff - 1e6);
-            parent::modify("+1 seconds");
+            parent::modify("+1 seconds"); // +1 sec
         } else {
-            $this->setMicroseconds($diff);
+            if ($diff < 0) {
+                parent::modify("-1 seconds"); // -1 sec
+                $this->setMicroseconds(1e6 + $diff);
+            } else {
+                $this->setMicroseconds($diff);
+            }
+
         }
     }
 
@@ -131,9 +137,26 @@ class DateTime extends \DateTime
     }
 
     // diff
-    public function diff($datetime2, $absolute = false)
+    public function diff($datetime, $absolute = false)
     {
-        return parent::diff($datetime2, $absolute);
+        $d1 = $this;
+        $d2 = clone $datetime;
+
+        echo $d1->format(self::ISO8601), "\n";
+        echo $d2->format(self::ISO8601), "\n";
+
+        print_r($d1->getMicroseconds(true)); echo "\n";
+        print_r($d2->getMicroseconds(true)); echo "\n";
+
+
+        $legacyDiff = parent::diff($datetime);
+        $realDiff = new DateInterval();
+
+        print_r($legacyDiff);
+        print_r($realDiff);
+
+
+        return parent::diff($datetime, $absolute);
     }
 
 
