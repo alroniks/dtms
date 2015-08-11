@@ -8,16 +8,32 @@ class DateTime extends \DateTime
 {
     const ISO8601 = 'Y-m-d\TH:i:s.u\Z';
 
-    public  $microseconds;
+    public $microseconds;
 
+    /**
+     * Set microseconds data to class
+     *
+     * @param $microcesonds
+     */
     public function setMicroseconds($microcesonds)
     {
         $this->microseconds = $microcesonds;
     }
 
-    public function getMicroseconds()
+
+    /**
+     * Get microseconds data to class
+     *
+     * @param boolean $inSeconds If defined, microseconds will be converted to seconds with fractions
+     * @return string
+     */
+    public function getMicroseconds($inSeconds = false)
     {
-        return $this->microseconds;
+        if ($inSeconds) {
+            return $this->microseconds * 1/1e6;
+        }
+
+        return intval($this->microseconds);
     }
 
     public function __construct($time = 'now', \DateTimeZone $timezone = null)
@@ -31,6 +47,37 @@ class DateTime extends \DateTime
 
         return parent::__construct($time instanceof \DateTime ? $time->format(self::ISO8601) : $time, $timezone);
     }
+
+    public function getTimestamp($inMicroseconds = false)
+    {
+        $timestamp = parent::getTimestamp();
+
+        if ($inMicroseconds) {
+            $timestamp += $this->getMicroseconds(true);
+        }
+
+        return $timestamp;
+    }
+
+    // setTimestamp // with ms
+//    public function setTimestamp($seconds)
+//    {
+//        if (false !== ($res = filter_var($seconds, FILTER_VALIDATE_INT))) {
+//            return $datetime->add(new DateInterval('PT'.$res.'S'));
+//        }
+//        $timestamp = explode('.', sprintf('%6f', $seconds));
+//        $seconds   = (int) $timestamp[0];
+//        $micro     = $timestamp[1] + $datetime->format('u');
+//        if ($micro > 1e6) {
+//            $micro -= 1e6;
+//            $seconds++;
+//        }
+//        $dateEnd = $datetime->add(new DateInterval('PT'.$seconds.'S'));
+//        return new DateTimeImmutable(
+//            $dateEnd->format('Y-m-d H:i:s').".".sprintf('%06d', $micro),
+//            $datetime->getTimeZone()
+//        );
+//    }
 
     public function setTime($hour, $minute, $second = 0, $microsecond = 0)
     {
@@ -62,31 +109,9 @@ class DateTime extends \DateTime
     // sub
     // modify
 
-    // setTimestamp // with ms
-    public function setTimestamp($seconds)
-    {
-        if (false !== ($res = filter_var($seconds, FILTER_VALIDATE_INT))) {
-            return $datetime->add(new DateInterval('PT'.$res.'S'));
-        }
-        $timestamp = explode('.', sprintf('%6f', $seconds));
-        $seconds   = (int) $timestamp[0];
-        $micro     = $timestamp[1] + $datetime->format('u');
-        if ($micro > 1e6) {
-            $micro -= 1e6;
-            $seconds++;
-        }
-        $dateEnd = $datetime->add(new DateInterval('PT'.$seconds.'S'));
-        return new DateTimeImmutable(
-            $dateEnd->format('Y-m-d H:i:s').".".sprintf('%06d', $micro),
-            $datetime->getTimeZone()
-        );
-    }
 
-    // getTimestamp // with ms
-    public function getTimestapm()
-    {
-        return parent::getTimestamp();
-    }
+
+
 
     // diff
 
@@ -103,6 +128,13 @@ class DateTime extends \DateTime
         $datetime->setMicroseconds($microseconds);
 
         return $datetime;
+    }
+
+    public function format($format)
+    {
+        $format = str_replace('u', sprintf('%06d', $this->microseconds), $format);
+
+        return parent::format($format);
     }
 
     public function __toString()
