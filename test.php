@@ -25,16 +25,18 @@ use alroniks\dtms\DateTime;
 //$dt = new DateTime();
 
 //$dt = new DateTime();
-$dt = DateTime::createFromFormat('U.u', '1439217570.0501', null);
+$dt = DateTime::createFromFormat('U.u', '1439217570.654321', null);
 
-$i = new DateInterval('PT20.0201S');
+$i = new DateInterval('PT20.654321S');
 
 print_r($dt);
-echo $i->format('PT%HH%II%SS'), "\n";
+echo $i->format('PT%sS'), "\n";
 
-$dt2 = $dt->add($i);
+//$dt2 = $dt->add($i);
+//print_r($dt2);
+//print_r($dt2->format(DateTime::ISO8601));
 
-print_r($dt2);
-
-print_r($dt2->format(DateTime::ISO8601));
+//$dt2 = $dt->sub($i);
+//print_r($dt2);
+//print_r($dt2->format(DateTime::ISO8601));
 

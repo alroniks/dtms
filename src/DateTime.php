@@ -79,41 +79,63 @@ class DateTime extends \DateTime
 //        );
 //    }
 
-    public function setTime($hour, $minute, $second = 0, $microsecond = 0)
-    {
-        $second += $microsecond / 1e6;
+//    public function setTime($hour, $minute, $second = 0, $microsecond = 0)
+//    {
+//        $second += $microsecond / 1e6;
+//
+//        $this->setMicroseconds($microsecond);
+//
+//        return parent::setTime($hour, $minute, $second);
+//    }
 
-        $this->setMicroseconds($microsecond);
-
-        return parent::setTime($hour, $minute, $second);
-    }
-
-    // add
     public function add(DateInterval $interval)
     {
         if ($interval instanceof DateInterval) {
-
-
-            return parent::add($interval);
-
+            $this->modifyMicroseconds(intval($interval->u), $interval->invert);
         }
 
-
+        return parent::add($interval);
     }
 
-    protected function modifyMicroseconds($microseconds)
+    public function sub(DateInterval $interval)
     {
+        if ($interval instanceof DateInterval) {
+            $this->modifyMicroseconds(intval($interval->u), !$interval->invert);
+        }
 
+        return parent::sub($interval);
     }
 
-    // sub
+    protected function modifyMicroseconds($microseconds, $invert)
+    {
+        if ($invert) {
+            $microseconds *= -1;
+        }
+
+        $diff = $this->getMicroseconds() + $microseconds;
+
+        if ($diff > 1e6) { // +1 sec
+            $this->setMicroseconds($diff - 1e6);
+            parent::modify("+1 seconds");
+        } else {
+            $this->setMicroseconds($diff);
+        }
+    }
+
     // modify
+    public function modify($modify)
+    {
+        // add support of microseconds
 
-
-
-
+        return parent::modify($modify);
+    }
 
     // diff
+    public function diff($datetime2, $absolute = false)
+    {
+        return parent::diff($datetime2, $absolute);
+    }
+
 
     public static function createFromFormat($format, $time, DateTimeZone $timezone = null)
     {
