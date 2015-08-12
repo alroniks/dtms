@@ -114,6 +114,7 @@ class DateTime extends \DateTime
 
         $diff = $this->getMicroseconds() + $microseconds;
 
+        // todo: refactoring - move it to separated method, because code duplicated
         if ($diff > 1e6) {
             $this->setMicroseconds($diff - 1e6);
             parent::modify("+1 seconds"); // +1 sec
@@ -136,27 +137,32 @@ class DateTime extends \DateTime
         return parent::modify($modify);
     }
 
-    // diff
     public function diff($datetime, $absolute = false)
     {
         $d1 = $this;
         $d2 = clone $datetime;
 
-        echo $d1->format(self::ISO8601), "\n";
-        echo $d2->format(self::ISO8601), "\n";
+        $diff = new DateInterval('PT0S');
+        foreach (get_object_vars(parent::diff($datetime)) as $property => $value) {
+            $diff->{$property} = $value;
+        }
 
-        print_r($d1->getMicroseconds(true)); echo "\n";
-        print_r($d2->getMicroseconds(true)); echo "\n";
+        $sdiff = 0;
+        $udiff = $d1->getMicroseconds() - $d2->getMicroseconds();
+        if ($udiff > 1e6) {
+            $udiff = $udiff - 1e6;
+            $sdiff++;
+        } else {
+            if ($udiff < 0) {
+                $udiff = 1e6 + $udiff;
+                $sdiff--;
+            }
+        }
 
+        $diff->u = $udiff;
+        $diff->s += $sdiff;
 
-        $legacyDiff = parent::diff($datetime);
-        $realDiff = new DateInterval();
-
-        print_r($legacyDiff);
-        print_r($realDiff);
-
-
-        return parent::diff($datetime, $absolute);
+        return $diff;
     }
 
     public static function createFromFormat($format, $time, $timezone = null)
