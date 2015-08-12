@@ -88,7 +88,7 @@ class DateTime extends \DateTime
 //        return parent::setTime($hour, $minute, $second);
 //    }
 
-    public function add(DateInterval $interval)
+    public function add($interval)
     {
         if ($interval instanceof DateInterval) {
             $this->modifyMicroseconds(intval($interval->u), $interval->invert);
@@ -97,7 +97,7 @@ class DateTime extends \DateTime
         return parent::add($interval);
     }
 
-    public function sub(DateInterval $interval)
+    public function sub($interval)
     {
         if ($interval instanceof DateInterval) {
             $this->modifyMicroseconds(intval($interval->u), !$interval->invert);
@@ -159,8 +159,7 @@ class DateTime extends \DateTime
         return parent::diff($datetime, $absolute);
     }
 
-
-    public static function createFromFormat($format, $time, DateTimeZone $timezone = null)
+    public static function createFromFormat($format, $time, $timezone = null)
     {
         if ($timezone === null) {
             $timezone = new DateTimeZone(date_default_timezone_get());
