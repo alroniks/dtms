@@ -26,14 +26,14 @@ use alroniks\dtms\DateTime;
 
 //$dt = new DateTime();
 $dt = DateTime::createFromFormat('U.u', '1439217570.654321', null);
-print_r($dt);
+print_r($dt->format(DateTime::ISO8601)); echo "\n";
 
 $i = new DateInterval('PT20.654321S');
 echo $i->format('PT%sS'), "\n";
 
 $dt2 = clone $dt;
 $dt2->add($i);
-//print_r($dt2->format(DateTime::ISO8601)); echo "\n";
+print_r($dt2->format(DateTime::ISO8601)); echo "\n";
 
 $dt3 = clone $dt;
 $dt3->sub($i);
@@ -41,8 +41,10 @@ $dt3->sub($i);
 
 $dt4 = clone $dt;
 $dt4->sub(new DateInterval('PT20.999999S'));
-//print_r($dt4->format(DateTime::ISO8601)); echo "\n";
+print_r($dt4->format(DateTime::ISO8601)); echo "\n";
 
 // diff
-$dt2->diff($dt3);
+$diff = $dt2->diff($dt4);
+
+print_r($diff);
 

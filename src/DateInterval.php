@@ -15,11 +15,13 @@ class DateInterval extends \DateInterval
      */
     public function __construct($interval_spec)
     {
+        $u = 0;
         if (preg_match('/\.([0-9]{1,6})/', $interval_spec, $matches)) {
             $u = intval(str_pad(array_pop($matches), 6, 0, STR_PAD_RIGHT));
-            $this->u = $u;
             $interval_spec = str_replace(array_shift($matches), '', $interval_spec);
         }
+
+        $this->u = $u;
 
         return parent::__construct($interval_spec);
     }
