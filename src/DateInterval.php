@@ -36,6 +36,7 @@ class DateInterval extends \DateInterval
 
         if ($this instanceof DateInterval
             && property_exists($this, 'u')
+            && $this->u != 0
         ) {
             $formatted = preg_replace(
                 '/([0-9]{1,2})S/',

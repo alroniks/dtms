@@ -42,7 +42,7 @@ class DateTime extends \DateTime
             $micro = microtime();
             list($u, $s) = explode(' ', $micro);
             $time = \DateTime::createFromFormat('U.u', join('.', array($s, sprintf('%6f', $u) * 1e6)));
-            $this->microseconds = $time->format('u');
+            $this->microseconds = $time->format('u') ?: 0;
         }
 
         return parent::__construct($time instanceof \DateTime ? $time->format(self::ISO8601) : $time, $timezone);
@@ -147,20 +147,26 @@ class DateTime extends \DateTime
             $diff->{$property} = $value;
         }
 
-        $sdiff = 0;
         $udiff = $d1->getMicroseconds() - $d2->getMicroseconds();
+
         if ($udiff > 1e6) {
             $udiff = $udiff - 1e6;
-            $sdiff++;
+            $diff->s++;
         } else {
             if ($udiff < 0) {
                 $udiff = 1e6 + $udiff;
-                $sdiff--;
+                $diff->s--;
             }
         }
 
         $diff->u = $udiff;
-        $diff->s += $sdiff;
+
+        if ($diff->s < 0) {
+            $diff->invert = !$diff->invert;
+            $diff->s = abs($diff->s);
+        }
+
+//        $diff->invert = $diff->invert && ($d1->getTimestamp(true) < $d2->getTimestamp(true));
 
         return $diff;
     }
@@ -174,7 +180,7 @@ class DateTime extends \DateTime
         $datetime = \DateTime::createFromFormat($format, $time, $timezone);
         $microseconds = $datetime->format('u');
 
-        $datetime = new self($datetime);
+        $datetime = new self($datetime, $timezone);
         $datetime->setMicroseconds($microseconds);
 
         return $datetime;
