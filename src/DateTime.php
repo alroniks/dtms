@@ -68,6 +68,10 @@ class DateTime extends \DateTime
      */
     public function __construct($time = 'now', \DateTimeZone $timezone = null)
     {
+        if ($timezone === null) {
+            $timezone = new DateTimeZone(date_default_timezone_get());
+        }
+
         $nativeTime = new \DateTime($time, $timezone);
         list($u, $s) = $time == 'now'
             ? explode(' ', microtime())

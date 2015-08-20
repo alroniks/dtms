@@ -8,7 +8,7 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        // do nothing
+        date_default_timezone_set('UTC');
     }
 
     public function tearDown()
