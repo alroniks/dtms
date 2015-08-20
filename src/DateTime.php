@@ -6,46 +6,80 @@ use DateTimeZone;
 
 class DateTime extends \DateTime
 {
+    /**
+     * Improved ISO8601 format string with support of microseconds.
+     */
     const ISO8601 = 'Y-m-d\TH:i:s.u\Z';
 
+    /**
+     * @var int Current number of microseconds.
+     */
     public $microseconds;
 
     /**
-     * Set microseconds data to class
+     * Sets microseconds data to object.
      *
-     * @param $microcesonds
+     * @param $microseconds
      */
-    public function setMicroseconds($microcesonds)
+    public function setMicroseconds($microseconds)
     {
-        $this->microseconds = $microcesonds;
+        $this->microseconds = intval($microseconds);
     }
 
-
     /**
-     * Get microseconds data to class
+     * Gets microseconds data from object
      *
-     * @param boolean $inSeconds If defined, microseconds will be converted to seconds with fractions
+     * @param boolean $asSeconds If defined, microseconds will be converted to seconds with fractions
      * @return string
      */
-    public function getMicroseconds($inSeconds = false)
+    public function getMicroseconds($asSeconds = false)
     {
-        if ($inSeconds) {
-            return $this->microseconds * 1/1e6;
+        if ($asSeconds) {
+            return round($this->microseconds * 1/1e6, 6);
         }
 
         return intval($this->microseconds);
     }
 
-    public function __construct($time = 'now', \DateTimeZone $timezone = null)
+    /**
+     * Parse a string into a new DateTime object according to the specified format
+     *
+     * @param string $format
+     * @param string $time
+     * @param null $timezone
+     * @return DateTime|\DateTime
+     */
+    public static function createFromFormat($format, $time, $timezone = null)
     {
-        if ($time == 'now') {
-            $micro = microtime();
-            list($u, $s) = explode(' ', $micro);
-            $time = \DateTime::createFromFormat('U.u', join('.', array($s, sprintf('%6f', $u) * 1e6)));
-            $this->microseconds = $time->format('u') ?: 0;
+        if ($timezone === null) {
+            $timezone = new DateTimeZone(date_default_timezone_get());
         }
 
-        return parent::__construct($time instanceof \DateTime ? $time->format(self::ISO8601) : $time, $timezone);
+        $datetime = \DateTime::createFromFormat($format, $time, $timezone);
+
+        return new self($datetime->format(DateTime::ISO8601), $timezone);
+    }
+
+    /**
+     * Instantiates custom DateTime object with support of microseconds.
+     *
+     * @param string $time
+     * @param DateTimeZone|null $timezone
+     */
+    public function __construct($time = 'now', \DateTimeZone $timezone = null)
+    {
+        $nativeTime = new \DateTime($time, $timezone);
+        list($u, $s) = $time == 'now'
+            ? explode(' ', microtime())
+            : array(
+                $nativeTime->format('u') / 1e6,
+                $nativeTime->getTimestamp()
+            );
+
+        $time = \DateTime::createFromFormat('U.u', join('.', array($s, sprintf('%6f', $u) * 1e6)));
+        $this->microseconds = $time->format('u') ?: 0;
+
+        return parent::__construct($time->format(static::ISO8601), $timezone);
     }
 
     public function getTimestamp($inMicroseconds = false)
@@ -58,35 +92,6 @@ class DateTime extends \DateTime
 
         return $timestamp;
     }
-
-    // setTimestamp // with ms
-//    public function setTimestamp($seconds)
-//    {
-//        if (false !== ($res = filter_var($seconds, FILTER_VALIDATE_INT))) {
-//            return $datetime->add(new DateInterval('PT'.$res.'S'));
-//        }
-//        $timestamp = explode('.', sprintf('%6f', $seconds));
-//        $seconds   = (int) $timestamp[0];
-//        $micro     = $timestamp[1] + $datetime->format('u');
-//        if ($micro > 1e6) {
-//            $micro -= 1e6;
-//            $seconds++;
-//        }
-//        $dateEnd = $datetime->add(new DateInterval('PT'.$seconds.'S'));
-//        return new DateTimeImmutable(
-//            $dateEnd->format('Y-m-d H:i:s').".".sprintf('%06d', $micro),
-//            $datetime->getTimeZone()
-//        );
-//    }
-
-//    public function setTime($hour, $minute, $second = 0, $microsecond = 0)
-//    {
-//        $second += $microsecond / 1e6;
-//
-//        $this->setMicroseconds($microsecond);
-//
-//        return parent::setTime($hour, $minute, $second);
-//    }
 
     public function add($interval)
     {
@@ -129,7 +134,6 @@ class DateTime extends \DateTime
         }
     }
 
-    // modify
     public function modify($modify)
     {
         // add support of microseconds
@@ -140,7 +144,7 @@ class DateTime extends \DateTime
     public function diff($datetime, $absolute = false)
     {
         $d1 = $this;
-        $d2 = clone $datetime;
+        $d2 = $datetime instanceof \DateTime ? new self($datetime) : clone $datetime;
 
         $diff = new DateInterval('PT0S');
         foreach (get_object_vars(parent::diff($datetime)) as $property => $value) {
@@ -171,21 +175,12 @@ class DateTime extends \DateTime
         return $diff;
     }
 
-    public static function createFromFormat($format, $time, $timezone = null)
-    {
-        if ($timezone === null) {
-            $timezone = new DateTimeZone(date_default_timezone_get());
-        }
-
-        $datetime = \DateTime::createFromFormat($format, $time, $timezone);
-        $microseconds = $datetime->format('u');
-
-        $datetime = new self($datetime, $timezone);
-        $datetime->setMicroseconds($microseconds);
-
-        return $datetime;
-    }
-
+    /**
+     * Returns date formatted according to given format.
+     *
+     * @param string $format
+     * @return string
+     */
     public function format($format)
     {
         $format = str_replace('u', sprintf('%06d', $this->microseconds), $format);
@@ -193,6 +188,11 @@ class DateTime extends \DateTime
         return parent::format($format);
     }
 
+    /**
+     * Converts DateTime object to string using ISO8601 format.
+     *
+     * @return string
+     */
     public function __toString()
     {
         return $this->format(static::ISO8601);
