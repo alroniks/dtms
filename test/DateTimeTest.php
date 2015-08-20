@@ -17,7 +17,7 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DateTime::getMicroseconds
+     * @covers alroniks\dtms\DateTime::getMicroseconds
      */
     public function testSetMicroseconds()
     {
@@ -38,7 +38,7 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DateTime::getMicroseconds
+     * @covers alroniks\dtms\DateTime::getMicroseconds
      */
     public function testGetMicroseconds()
     {
@@ -53,7 +53,7 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DateTime::createFromFormat
+     * @covers alroniks\dtms\DateTime::createFromFormat
      */
     public function testCreateFromFormat()
     {
@@ -64,7 +64,7 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DateTime::__construct
+     * @covers alroniks\dtms\DateTime::__construct
      */
     public function testConstruct()
     {
@@ -77,7 +77,7 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DateTime::format
+     * @covers alroniks\dtms\DateTime::format
      */
     public function testFormat()
     {
@@ -88,7 +88,7 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers DateTime::__toString
+     * @covers alroniks\dtms\DateTime::__toString
      */
     public function testToString()
     {
