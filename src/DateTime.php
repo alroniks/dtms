@@ -3,6 +3,7 @@
 namespace alroniks\dtms;
 
 use DateTimeZone;
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
 
 class DateTime extends \DateTime
 {
@@ -30,7 +31,7 @@ class DateTime extends \DateTime
      * Gets microseconds data from object
      *
      * @param boolean $asSeconds If defined, microseconds will be converted to seconds with fractions
-     * @return string
+     * @return int|float
      */
     public function getMicroseconds($asSeconds = false)
     {
@@ -86,56 +87,104 @@ class DateTime extends \DateTime
         return parent::__construct($time->format(static::ISO8601), $timezone);
     }
 
-    public function getTimestamp($inMicroseconds = false)
+    /**
+     * Gets the Unix timestamp in seconds with microseconds.
+     *
+     * @return int
+     */
+    public function getTimestampWithMicroseconds()
     {
-        $timestamp = parent::getTimestamp();
-
-        if ($inMicroseconds) {
-            $timestamp += $this->getMicroseconds(true);
-        }
-
-        return $timestamp;
+        return $this->getTimestamp() + $this->getMicroseconds(true);
     }
 
-    public function add($interval)
+    /**
+     * Subtracts an amount of microseconds from a DateTime object
+     *
+     * @param $microseconds
+     */
+    protected function addMicroseconds($microseconds)
     {
-        if ($interval instanceof DateInterval) {
-            $this->modifyMicroseconds(intval($interval->u), $interval->invert);
-        }
-
-        return parent::add($interval);
-    }
-
-    public function sub($interval)
-    {
-        if ($interval instanceof DateInterval) {
-            $this->modifyMicroseconds(intval($interval->u), !$interval->invert);
-        }
-
-        return parent::sub($interval);
-    }
-
-    protected function modifyMicroseconds($microseconds, $invert)
-    {
-        if ($invert) {
-            $microseconds *= -1;
+        if ($microseconds < 0) {
+            throw new \InvalidArgumentException("Value of microseconds should be positive.");
         }
 
         $diff = $this->getMicroseconds() + $microseconds;
+        $seconds = floor($diff / 1e6);
+        $diff -= $seconds * 1e6;
 
-        // todo: refactoring - move it to separated method, because code duplicated
-        if ($diff > 1e6) {
-            $this->setMicroseconds($diff - 1e6);
-            parent::modify("+1 seconds"); // +1 sec
-        } else {
-            if ($diff < 0) {
-                parent::modify("-1 seconds"); // -1 sec
-                $this->setMicroseconds(1e6 + $diff);
-            } else {
-                $this->setMicroseconds($diff);
-            }
-
+        if ($diff >= 1e6) {
+            $diff -= 1e6;
+            $seconds++;
         }
+
+        $this->modify("+$seconds seconds");
+        $this->setMicroseconds($diff);
+    }
+
+    /**
+     * Adds an amount of microseconds to a DateTime object
+     *
+     * @param $microseconds
+     */
+    protected function subMicroseconds($microseconds)
+    {
+        if ($microseconds < 0) {
+            throw new \InvalidArgumentException("Value of microseconds should be positive.");
+        }
+
+        $diff = $this->getMicroseconds() - $microseconds;
+        $seconds = floor($diff / 1e6);
+        $diff -= $seconds * 1e6;
+
+        if ($diff < 0) {
+            $diff = abs($diff);
+            $seconds++;
+        }
+
+        $this->modify("$seconds seconds");
+        $this->setMicroseconds($diff);
+    }
+
+    /**
+     * Adds an amount of days, months, years, hours, minutes, seconds and microseconds to a DateTime object
+     *
+     * @param DateInterval $interval
+     * @return DateTime $this
+     */
+    public function add($interval)
+    {
+        parent::add($interval);
+
+        if ($interval instanceof DateInterval) {
+            if ($interval->invert) { // is negative, then sub
+                $this->subMicroseconds($interval->u);
+            } else {
+                $this->addMicroseconds($interval->u);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Subtracts an amount of days, months, years, hours, minutes and seconds from a DateTime object
+     *
+     * @param DateInterval $interval
+     * @return DateTime $this
+     */
+    public function sub($interval)
+    {
+        parent::sub($interval);
+
+        if ($interval instanceof DateInterval) {
+            if ($interval->invert) {
+                $this->addMicroseconds($interval->u);
+            } else {
+                $this->subMicroseconds($interval->u);
+            }
+        }
+
+        return $this;
     }
 
     public function modify($modify)

@@ -21,9 +21,18 @@ class DateInterval extends \DateInterval
             $interval_spec = str_replace(array_shift($matches), '', $interval_spec);
         }
 
-        $this->u = $u;
+        $invert = false;
+        if (preg_match('/^-{1}/', $interval_spec, $matches)) {
+            $invert = true;
+            $interval_spec = str_replace(array_shift($matches), '', $interval_spec);
+        }
 
-        return parent::__construct($interval_spec);
+        parent::__construct($interval_spec);
+
+        $this->u = $u;
+        $this->invert = $invert;
+
+        return $this;
     }
 
     /**
