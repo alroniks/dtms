@@ -203,6 +203,7 @@ class DateTime extends \DateTime
             $diff->{$property} = $value;
         }
 
+
         $udiff = $d1->getMicroseconds() - $d2->getMicroseconds();
 
         if ($udiff > 1e6) {
