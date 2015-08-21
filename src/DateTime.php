@@ -3,7 +3,6 @@
 namespace alroniks\dtms;
 
 use DateTimeZone;
-use Doctrine\Instantiator\Exception\InvalidArgumentException;
 
 class DateTime extends \DateTime
 {
