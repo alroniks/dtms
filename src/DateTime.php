@@ -186,46 +186,63 @@ class DateTime extends \DateTime
         return $this;
     }
 
+    /**
+     * Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime().
+     * Added support for microseconds: (+|-)10 mic|micro|microsecond|microseconds
+     *
+     * @param string $modify
+     * @return \DateTime
+     */
     public function modify($modify)
     {
-        // add support of microseconds
+        if (preg_match('/(\+|-)([0-9]+)(?:\s?)(?:microseconds|microsecond|micro|mic)$/', $modify, $matches)) {
+            $modify = str_replace($matches[0], '', $modify);
+            $number = intval($matches[2]);
+            switch ($matches[1]) {
+                case '-':
+                    $this->subMicroseconds($number);
+                    break;
+                case '+':
+                    $this->addMicroseconds($number);
+                    break;
+            }
+        }
+
+        if (!$modify) {
+            $modify = '0 seconds';
+        }
 
         return parent::modify($modify);
     }
 
+    /**
+     * Returns the difference between two DateTime objects represented as a DateInterval.
+     *
+     * @param \DateTime $datetime
+     * @param bool|false $absolute
+     * @return DateInterval
+     */
     public function diff($datetime, $absolute = false)
     {
-        $d1 = $this;
+        $d1 = clone $this;
         $d2 = $datetime instanceof \DateTime ? new self($datetime) : clone $datetime;
 
-        $diff = new DateInterval('PT0S');
+        $interval = new DateInterval('PT0.000000S');
         foreach (get_object_vars(parent::diff($datetime)) as $property => $value) {
-            $diff->{$property} = $value;
+            $interval->{$property} = $value;
         }
 
+        $negative = $d1->getTimestampWithMicroseconds() > $d2->getTimestampWithMicroseconds();
+        $diff = abs($d1->getTimestampWithMicroseconds() - $d2->getTimestampWithMicroseconds());
 
-        $udiff = $d1->getMicroseconds() - $d2->getMicroseconds();
+        $seconds = intval($diff);
+        $microseconds = round($diff - $seconds, 6) * 1e6;
 
-        if ($udiff > 1e6) {
-            $udiff = $udiff - 1e6;
-            $diff->s++;
-        } else {
-            if ($udiff < 0) {
-                $udiff = 1e6 + $udiff;
-                $diff->s--;
-            }
-        }
+        $interval->s = $seconds;
+        $interval->u = $microseconds;
+        $interval->invert = $absolute ? false : $negative;
 
-        $diff->u = $udiff;
-
-        if ($diff->s < 0) {
-            $diff->invert = !$diff->invert;
-            $diff->s = abs($diff->s);
-        }
-
-//        $diff->invert = $diff->invert && ($d1->getTimestamp(true) < $d2->getTimestamp(true));
-
-        return $diff;
+        return $interval;
     }
 
     /**

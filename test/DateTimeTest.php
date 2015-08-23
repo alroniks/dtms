@@ -237,6 +237,114 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('1439028612.000000', $dt->format('U.u'));
     }
 
+    /**
+     * @covers alroniks\dtms\DateTime::modify
+     */
+    public function testModify()
+    {
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+10 microseconds');
+        $this->assertEquals('1439028610.123466', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+10 microsecond');
+        $this->assertEquals('1439028610.123466', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+10 micro');
+        $this->assertEquals('1439028610.123466', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+10 mic');
+        $this->assertEquals('1439028610.123466', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+10microseconds');
+        $this->assertEquals('1439028610.123466', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+10microsecond');
+        $this->assertEquals('1439028610.123466', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+10micro');
+        $this->assertEquals('1439028610.123466', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+10mic');
+        $this->assertEquals('1439028610.123466', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('-10 microseconds');
+        $this->assertEquals('1439028610.123446', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('-10 microsecond');
+        $this->assertEquals('1439028610.123446', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('-10 micro');
+        $this->assertEquals('1439028610.123446', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('-10 mic');
+        $this->assertEquals('1439028610.123446', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+999999 micro');
+        $this->assertEquals('1439028611.123455', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('-999999 micro');
+        $this->assertEquals('1439028609.123457', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+1999999 micro');
+        $this->assertEquals('1439028612.123455', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('-1999999 micro');
+        $this->assertEquals('1439028608.123457', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('+10 min +10 seconds +123456 micro');
+        $this->assertEquals('1439029220.246912', $dt->format('U.u'));
+
+        $dt = new DateTime('2015-08-08 10:10:10.123456');
+        $dt->modify('-10 min -10 seconds -123456 micro');
+        $this->assertEquals('1439028000.000000', $dt->format('U.u'));
+    }
+
+    /**
+     * @covers alroniks\dtms\DateTime::diff
+     */
+    public function testDiff()
+    {
+        $dt1 = new DateTime('2015-08-08 10:10:10.123456');
+        $dt2 = new DateTime('2015-08-08 10:10:05.654321');
+        $this->assertEquals('-PT4.469135S', $dt1->diff($dt2)->format('%RPT%sS'));
+        $this->assertEquals('+PT4.469135S', $dt2->diff($dt1)->format('%RPT%sS'));
+
+        $dt1 = new DateTime('2015-08-08 10:10:10.123456');
+        $dt2 = new DateTime('2015-08-08 10:10:10.123455');
+        $this->assertEquals('-PT0.000001S', $dt1->diff($dt2)->format('%RPT%sS'));
+        $this->assertEquals('+PT0.000001S', $dt2->diff($dt1)->format('%RPT%sS'));
+
+        $dt1 = new DateTime('2015-08-08 10:10:10.123456');
+        $dt2 = new DateTime('2015-08-08 10:10:15.654321');
+        $this->assertEquals('+PT5.530865S', $dt1->diff($dt2)->format('%RPT%sS'));
+        $this->assertEquals('-PT5.530865S', $dt2->diff($dt1)->format('%RPT%sS'));
+
+        $dt1 = new DateTime('2015-08-08 10:10:10.123456');
+        $dt2 = new DateTime('2015-08-08 10:10:10.123456');
+        $this->assertEquals('+PT0S', $dt1->diff($dt2)->format('%RPT%sS'));
+        $this->assertEquals('+PT0S', $dt2->diff($dt1)->format('%RPT%sS'));
+
+        $dt1 = new DateTime('2015-08-08 10:10:10.123456');
+        $dt2 = new DateTime('2015-08-08 10:10:11.654321');
+        $this->assertEquals('+PT1.530865S', $dt1->diff($dt2, true)->format('%RPT%sS'));
+        $this->assertEquals('+PT1.530865S', $dt2->diff($dt1, true)->format('%RPT%sS'));
+    }
 
     /**
      * @covers alroniks\dtms\DateTime::__toString
