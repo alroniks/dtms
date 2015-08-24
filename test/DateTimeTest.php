@@ -354,6 +354,11 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
         $dt2 = new DateTime('2015-12-12 10:10:10.123456');
         $this->assertEquals('+P4M4DT0S', $dt1->diff($dt2)->format('%RP%mM%dDT%sS'));
         $this->assertEquals('-P4M4DT0S', $dt2->diff($dt1)->format('%RP%mM%dDT%sS'));
+
+        $dt1 = new DateTime('2015-08-10 10:10:10.101010');
+        $dt2 = new DateTime('2018-08-14 16:18:10.101010');
+        $this->assertEquals('+P3Y0M4DT6H8I0S', $dt1->diff($dt2)->format('%RP%yY%mM%dDT%hH%iI%sS'));
+        $this->assertEquals('-P3Y0M4DT6H8I0S', $dt2->diff($dt1)->format('%RP%yY%mM%dDT%hH%iI%sS'));
     }
 
     /**

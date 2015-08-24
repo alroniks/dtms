@@ -80,7 +80,7 @@ class DateTime extends \DateTime
                 $nativeTime->getTimestamp()
             );
 
-        $time = \DateTime::createFromFormat('U.u', join('.', array($s, sprintf('%6f', $u) * 1e6)));
+        $time = \DateTime::createFromFormat('U.u', join('.', array($s, str_replace('0.', '', sprintf('%6f', $u)))));
         $this->microseconds = $time->format('u') ?: 0;
 
         return parent::__construct($time->format(static::ISO8601), $timezone);
@@ -225,7 +225,7 @@ class DateTime extends \DateTime
     public function diff($datetime, $absolute = false)
     {
         $d1 = clone $this;
-        $d2 = $datetime instanceof \DateTime ? new self($datetime) : clone $datetime;
+        $d2 = $datetime instanceof \DateTime ? new static($datetime) : clone $datetime;
 
         $interval = new DateInterval('PT0.000000S');
         foreach (get_object_vars(parent::diff($datetime)) as $property => $value) {
@@ -233,17 +233,20 @@ class DateTime extends \DateTime
         }
         $interval->s = 0;
 
-        $now = new \DateTime('now');
-        $start = $now->getTimestamp();
-        $now->add($interval);
-        $end = $now->getTimestamp();
-        $antiseconds = abs($end - $start);
-
         $negative = $d1->getTimestampWithMicroseconds() > $d2->getTimestampWithMicroseconds();
         $diff = abs($d1->getTimestampWithMicroseconds() - $d2->getTimestampWithMicroseconds());
 
         $seconds = intval($diff);
         $microseconds = round($diff - $seconds, 6) * 1e6;
+
+        $now = new \DateTime('now');
+        $start = $now->getTimestamp();
+
+        $operation = $negative ? 'sub' : 'add';
+        $now->$operation($interval);
+
+        $end = $now->getTimestamp();
+        $antiseconds = abs($end - $start);
 
         $interval->s = $seconds - $antiseconds;
         $interval->u = $microseconds;
