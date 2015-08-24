@@ -16,7 +16,7 @@
     "support": {
         "issues": "https://github.com/alroniks/dtms/issues"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require": {
         "php" : ">=5.3.0"
     },
