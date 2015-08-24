@@ -18,9 +18,7 @@ class DateIntervalTest extends \PHPUnit_Framework_TestCase
 
     public function providerIntervalSpec()
     {
-        return [
-            '' => ''
-        ];
+
     }
 
     /**
@@ -39,11 +37,4 @@ class DateIntervalTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('alroniks\\dtms\\DateInterval', $interval);
         $this->assertEquals('PT2.200000S', $interval->format('PT%sS'));
     }
-
-//    public function testConstructWithSpec($intervalSpec)
-//    {
-////        $interval = new DateInterval($intervalSpec);
-////
-////        $this->assertEquals($intervalSpec->format('PT'));
-//    }
 }
