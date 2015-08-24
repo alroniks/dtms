@@ -225,7 +225,7 @@ class DateTime extends \DateTime
     public function diff($datetime, $absolute = false)
     {
         $d1 = clone $this;
-        $d2 = $datetime instanceof \DateTime ? new static($datetime) : clone $datetime;
+        $d2 = $datetime instanceof \DateTime ? new static($datetime->format(DateTime::ISO8601)) : clone $datetime;
 
         $interval = new DateInterval('PT0.000000S');
         foreach (get_object_vars(parent::diff($datetime)) as $property => $value) {
