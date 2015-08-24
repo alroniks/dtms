@@ -231,6 +231,13 @@ class DateTime extends \DateTime
         foreach (get_object_vars(parent::diff($datetime)) as $property => $value) {
             $interval->{$property} = $value;
         }
+        $interval->s = 0;
+
+        $now = new \DateTime('now');
+        $start = $now->getTimestamp();
+        $now->add($interval);
+        $end = $now->getTimestamp();
+        $antiseconds = abs($end - $start);
 
         $negative = $d1->getTimestampWithMicroseconds() > $d2->getTimestampWithMicroseconds();
         $diff = abs($d1->getTimestampWithMicroseconds() - $d2->getTimestampWithMicroseconds());
@@ -238,7 +245,7 @@ class DateTime extends \DateTime
         $seconds = intval($diff);
         $microseconds = round($diff - $seconds, 6) * 1e6;
 
-        $interval->s = $seconds;
+        $interval->s = $seconds - $antiseconds;
         $interval->u = $microseconds;
         $interval->invert = $absolute ? false : $negative;
 
