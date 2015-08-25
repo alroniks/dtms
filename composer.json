@@ -2,7 +2,7 @@
     "name": "alroniks/dtms",
     "type": "library",
     "description": "Classes for manipulate dates and intervals with microseconds precision",
-    "keywords": [],
+    "keywords": ["date", "time", "datetime", "ms", "microseconds", "milliseconds", "interval", "ISO8601", "fractions"],
     "license": "MIT",
     "homepage": "http://alroniks.github.io/dtms",
     "authors": [
@@ -16,7 +16,6 @@
     "support": {
         "issues": "https://github.com/alroniks/dtms/issues"
     },
-    "minimum-stability": "stable",
     "require": {
         "php" : ">=5.3.0"
     },
