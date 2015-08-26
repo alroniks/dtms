@@ -233,7 +233,7 @@ class DateTime extends \DateTime
         }
         $interval->s = 0;
 
-        $negative = $d1->getTimestampWithMicroseconds() > $d2->getTimestampWithMicroseconds();
+        $negative = $d1->getTimestampWithMicroseconds() >= $d2->getTimestampWithMicroseconds();
         $diff = abs($d1->getTimestampWithMicroseconds() - $d2->getTimestampWithMicroseconds());
 
         $seconds = intval($diff);
