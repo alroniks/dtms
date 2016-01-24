@@ -83,7 +83,7 @@ class DateTime extends \DateTime
         $time = \DateTime::createFromFormat('U.u', join('.', array($s, str_replace('0.', '', sprintf('%6f', $u)))));
         $this->microseconds = $time->format('u') ?: 0;
 
-        return parent::__construct($time->format(static::ISO8601), $timezone);
+        parent::__construct($time->format(static::ISO8601), $timezone);
     }
 
     /**
